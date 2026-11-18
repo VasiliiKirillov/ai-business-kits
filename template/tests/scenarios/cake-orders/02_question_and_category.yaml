@@ -1,0 +1,11 @@
+config: config/examples/cake-orders.yaml
+name: "вопрос про состав без заказа, потом назвал только категорию: бот называет цены"
+steps:
+  - client: "а из чего медовик?"
+    parse: {type: question}
+    expect_bot: ["Это вопрос"]
+    expect_card: false
+  - client: "ладно, хочу торт"
+    parse: {type: request, item: "Торты"}
+    expect_bot: ["Назови цены позиций этой категории", "Медовик - 1800", "Наполеон - 2000", "Чизкейк - 2200"]
+    expect_card: false

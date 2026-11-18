@@ -1,0 +1,16 @@
+config: config/examples/nail-studio.yaml
+name: "при подтверждении окошко уже заняли: записи нет, клиенту сообщают"
+steps:
+  - client: "педикюр 6 декабря в 11:00, телефон +7 000 000 00 00"
+    parse: {type: request, item: "Педикюр", date: "2030-12-06", time: "11:00", phone: "+7 000 000 00 00"}
+    expect_bot: ["Все собрано"]
+  - client: "да"
+    parse: {confirmed: true}
+    expect_card: true
+  - seed:
+      - {item: "Маникюр классический", start: "2030-12-06T11:00", end: "2030-12-06T12:00"}
+      - {item: "Педикюр", start: "2030-12-06T10:30", end: "2030-12-06T12:00"}
+  - manager: confirm
+    expect_manager: ["⛔"]
+    expect_no_booking: true
+    expect_bot: ["Пока подтверждали", "11:00"]

@@ -1,0 +1,14 @@
+config: config/examples/nail-studio.yaml
+name: "оба мастера заняты в это время: бот называет свободное время, клиент выбирает"
+seed_bookings:
+  - {item: "Педикюр", start: "2030-12-06T14:00", end: "2030-12-06T15:30"}
+  - {item: "Маникюр классический", start: "2030-12-06T14:00", end: "2030-12-06T15:00"}
+steps:
+  - client: "запишите на педикюр 6 декабря на 14:00"
+    parse: {type: request, item: "Педикюр", date: "2030-12-06", time: "14:00"}
+    expect_bot: ["время 14:00 занято", "Свободное время", "12:30", "15:00"]
+    expect_card: false
+  - client: "давайте в 15:00"
+    parse: {time: "15:00"}
+    expect_bot: ["Спроси телефон"]
+    expect_not_bot: ["занято"]

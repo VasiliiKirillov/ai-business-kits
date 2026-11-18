@@ -1,0 +1,94 @@
+# Пример: кондитерская (вымышленная "Sweet Corner"). Заказ: торт + количество + дата + доставка.
+# Проверки занятости нет, менеджер сам подтверждает сроки.
+
+business:
+  name: "Sweet Corner"
+  description: "Домашняя кондитерская, торты и десерты на заказ"
+  timezone: "Europe/Moscow"
+  currency: "руб."
+  language: ru
+
+bot:
+  persona: "Ольга, кондитер"
+  tone: |
+    Тепло и коротко, 1-2 предложения. Пишет как живой человек в мессенджере.
+  address: vy
+  greeting: "Здравствуйте, это Sweet Corner. Напишите, какой торт хотите, на какую дату и нужна ли доставка."
+  tone_examples:
+    - "Медовик на 5 человек, 1800 руб."
+    - "на какую дату нужен?"
+  banned_phrases: ["спасибо за обращение"]
+  style:
+    no_emoji: true
+    no_exclamation: true
+    replace_yo: true
+    plain_dashes: true
+  facts:
+    - "Заказы принимаем минимум за 2 дня."
+    - "Доставка по городу 300 руб., самовывоз бесплатно."
+  voice_reply: "голосовые пока не слушаю, напишите текстом"
+
+request:
+  noun: "заказ"
+  item_noun: "торт"
+  fields:
+    - key: item
+      type: item
+      label: "торт"
+      ask: "какой торт хотите"
+    - key: quantity
+      type: int
+      label: "количество"
+      default: 1
+      ask_only_if_unclear: true
+      describe: "сколько тортов, если ясно"
+      ask: "сколько тортов нужно"
+    - key: date
+      type: date
+      label: "дата"
+      describe: "на какую дату нужен заказ"
+      ask: "на какую дату нужен заказ"
+    - key: delivery
+      type: text
+      label: "получение"
+      describe: "адрес доставки или слово 'самовывоз'"
+      ask: "нужна ли доставка (адрес) или заберете сами"
+    - key: phone
+      type: phone
+      label: "телефон"
+      ask: "телефон для связи"
+      declinable: true
+      decline_reason: "номер нужен, чтобы согласовать время и детали заказа"
+  identity_document:
+    enabled: false
+
+catalog:
+  price_unit: "за штуку"
+  categories:
+    - {name: "Торты", aliases: ["торт", "cake"]}
+    - {name: "Десерты", aliases: ["десерт", "пирожное"]}
+  items:
+    - {name: "Медовик", aliases: ["медовик"], category: "Торты", price: 1800, details: "Классический медовик со сметанным кремом, около 1.5 кг."}
+    - {name: "Наполеон", aliases: ["наполеон"], category: "Торты", price: 2000}
+    - {name: "Чизкейк", aliases: ["чизкейк", "cheesecake"], category: "Торты", price: 2200}
+    - {name: "Набор макарон", aliases: ["макарон", "macaron"], category: "Десерты", price: 900}
+
+pricing:
+  mode: per_unit
+  quantity_field: quantity
+  rounding: 1
+
+availability:
+  mode: none
+
+manager:
+  confirm_button: "Подтвердить"
+  own_button: "Отвечу сама"
+  after_confirm_client: "Кондитер подтвердила заказ. Напиши клиенту подтверждение, дату и как будет получение"
+  handoff_text: "передала кондитеру, она подтвердит заказ, обычно в течение часа"
+
+data:
+  source: local
+
+documents:
+  engine: none

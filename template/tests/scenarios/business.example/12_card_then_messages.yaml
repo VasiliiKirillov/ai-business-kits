@@ -1,0 +1,22 @@
+config: config/business.example.yaml
+name: "после карточки реплики клиента пересылаются менеджеру, не-паспорт просит именно паспорт"
+steps:
+  - client: "нужен scoopy с 2030-12-01 на 2 дня, в центр, +66 00 000 0000"
+    parse: {type: request, item: "Honda Scoopy", date_from: "2030-12-01", days: 2, delivery: "центр", phone: "+66 00 000 0000"}
+    expect_bot: ["Спроси фото документа"]
+  - photo: {doc_type: other}
+    expect_bot: ["не паспорт"]
+    expect_card: false
+  - photo: {doc_full_name: "IVAN TESTOV", doc_number: "000000000", doc_nationality: "Russia", doc_birth_date: "1990-02-01"}
+    expect_bot: ["Все собрано"]
+  - client: "да"
+    parse: {confirmed: true}
+    expect_card: true
+    expect_forward_before_card: true
+  - client: "а можно привезти пораньше?"
+    parse: {}
+    expect_card: false
+    expect_manager: ["💬", "пораньше"]
+    expect_bot: ["Менеджер уже получил заявку"]
+  - manager: {own: "Привезем к 9 утра"}
+    expect_bot: ["Привезем к 9 утра"]

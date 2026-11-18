@@ -1,0 +1,12 @@
+config: config/business.example.yaml
+name: "нас двое: количество спрашиваем только когда неясно, цена считается на количество"
+steps:
+  - client: "нужен pcx с 2030-12-01 на 3 дня, нас двое, в центр, +66 00 000 0000"
+    parse: {type: request, item: "Honda PCX 160", date_from: "2030-12-01", days: 3, delivery: "центр", phone: "+66 00 000 0000", quantity: null, quantity_unclear: true}
+    expect_bot: ["Спроси один байк на двоих или два"]
+  - client: "два байка"
+    parse: {quantity: 2, quantity_unclear: false}
+    expect_bot: ["Спроси фото документа"]
+  - client: "IVAN TESTOV, 000000000, Russia, 1990-02-01"
+    parse: {doc_full_name: "IVAN TESTOV", doc_number: "000000000", doc_nationality: "Russia", doc_birth_date: "1990-02-01"}
+    expect_bot: ["Все собрано", "количество: 2", "2700"]

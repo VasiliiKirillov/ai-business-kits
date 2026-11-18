@@ -1,0 +1,13 @@
+config: config/examples/cake-orders.yaml
+name: "два торта считаются в итоге; шаги без parse идут через эвристику заглушки"
+steps:
+  - client: "хочу чизкейк"
+    expect_bot: ["Скажи цену", "Чизкейк - 2200", "Спроси на какую дату"]
+    expect_card: false
+  - client: "на 12 декабря, заберу сама, два торта"
+    parse: {date: "2030-12-12", delivery: "самовывоз", quantity: 2}
+    expect_bot: ["Спроси телефон"]
+  - client: "+7 000 000 00 00"
+    expect_bot: ["Все собрано", "количество: 2", "4400"]
+  - client: "да"
+    expect_card: true

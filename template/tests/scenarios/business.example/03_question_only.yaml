@@ -1,0 +1,15 @@
+config: config/business.example.yaml
+name: "вопрос без заявки: бот отвечает, карточки нет"
+steps:
+  - client: "сколько стоит аренда?"
+    parse: {type: question}
+    expect_bot: ["Это вопрос"]
+    expect_card: false
+  - client: "а шлем в комплекте?"
+    parse: {}
+    expect_bot: ["Это вопрос"]
+    expect_card: false
+  - client: "ок, тогда нужен click на 2030-12-01 на 2 дня"
+    parse: {type: request, item: "Honda Click 125", date_from: "2030-12-01", days: 2}
+    expect_bot: ["Скажи цену", "Honda Click 125", "600"]
+    expect_card: false

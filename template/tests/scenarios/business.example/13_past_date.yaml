@@ -1,0 +1,6 @@
+config: config/business.example.yaml
+name: "дата в прошлом не принимается: бот снова спрашивает дату"
+steps:
+  - client: "нужен pcx с 2020-01-05 на 3 дня"
+    parse: {type: request, item: "Honda PCX 160", date_from: "2020-01-05", days: 3}
+    expect_bot: ["Скажи цену", "с какого числа"]

@@ -1,0 +1,21 @@
+config: config/business.example.yaml
+name: "пока менеджер нажимал Подтвердить, байк заняли: бронь не создается, клиенту сообщают"
+steps:
+  - client: "нужен nmax с 2030-12-01 на 3 дня, самовывоз, +66 00 000 0000"
+    parse: {type: request, item: "Yamaha NMAX", date_from: "2030-12-01", days: 3, delivery: "самовывоз", phone: "+66 00 000 0000"}
+    expect_bot: ["Скажи цену", "Спроси фото документа"]
+  - photo: {doc_full_name: "IVAN TESTOV", doc_number: "000000000", doc_nationality: "Russia", doc_birth_date: "1990-02-01"}
+    expect_bot: ["Все собрано"]
+  - client: "да"
+    parse: {confirmed: true}
+    expect_card: true
+  - seed:
+      - {item: "Yamaha NMAX", start: "2030-12-01", end: "2030-12-04", quantity: 2}
+  - manager: confirm
+    expect_manager: ["⛔"]
+    expect_no_booking: true
+    expect_document: false
+    expect_bot: ["Пока подтверждали", "Yamaha NMAX"]
+  - client: "тогда давайте pcx"
+    parse: {item: "Honda PCX 160"}
+    expect_bot: ["Honda PCX 160", "Все собрано", "1350"]

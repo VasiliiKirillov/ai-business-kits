@@ -1,0 +1,10 @@
+config: config/business.example.yaml
+name: "мат в адрес бота внутри заявки не жалоба и не спам"
+steps:
+  - client: "нужен pcx"
+    parse: {type: request, item: "Honda PCX 160"}
+    expect_bot: ["Скажи цену", "Спроси с какого числа"]
+  - client: "ты че тупишь, блин"
+    parse: {}
+    expect_card: false
+    expect_bot: ["Ничего не спрашивай"]

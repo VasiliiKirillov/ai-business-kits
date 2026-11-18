@@ -1,0 +1,13 @@
+config: config/business.example.yaml
+name: "байк занят на даты: бот называет альтернативы с ценами, клиент выбирает другой"
+seed_bookings:
+  - {item: "Honda PCX 160", start: "2030-12-01", end: "2030-12-04", quantity: 4}
+steps:
+  - client: "нужен pcx с 2030-12-01 на 3 дня"
+    parse: {type: request, item: "Honda PCX 160", date_from: "2030-12-01", days: 3}
+    expect_bot: ["Honda PCX 160 занят", "Yamaha NMAX - 500", "Свободны"]
+    expect_card: false
+  - client: "давайте nmax"
+    parse: {item: "Yamaha NMAX"}
+    expect_bot: ["Скажи цену", "Yamaha NMAX", "1500", "Спроси куда привезти"]
+    expect_not_bot: ["занят"]

@@ -1,0 +1,9 @@
+config: config/examples/nail-studio.yaml
+name: "время вне часов работы: бот говорит, что не подходит, и предлагает ближайшее"
+steps:
+  - client: "педикюр 6 декабря в 22:00"
+    parse: {type: request, item: "Педикюр", date: "2030-12-06", time: "22:00"}
+    expect_bot: ["не подходит", "18:00", "18:30"]
+  - client: "тогда в 18:00"
+    parse: {time: "18:00"}
+    expect_bot: ["Спроси телефон"]

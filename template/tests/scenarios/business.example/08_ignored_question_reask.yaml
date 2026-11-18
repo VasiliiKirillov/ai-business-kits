@@ -1,0 +1,16 @@
+config: config/business.example.yaml
+name: "клиент игнорирует вопрос 2 реплики, на 3-й бот возвращается к нему другими словами"
+steps:
+  - client: "нужен pcx"
+    parse: {type: request, item: "Honda PCX 160"}
+    expect_bot: ["Спроси с какого числа"]
+  - client: "а шлем есть?"
+    parse: {}
+    expect_bot: ["Ничего не спрашивай"]
+    expect_not_bot: ["Спроси", "Вернись"]
+  - client: "и права нужны?"
+    parse: {}
+    expect_bot: ["Ничего не спрашивай"]
+  - client: "понятно"
+    parse: {}
+    expect_bot: ["Вернись к вопросу", "с какого числа"]

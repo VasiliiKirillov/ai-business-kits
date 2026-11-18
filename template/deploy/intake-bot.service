@@ -1,0 +1,16 @@
+[Unit]
+Description=Intake bot (приемщик заявок)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/intake-bot
+ExecStart=%h/intake-bot/.venv/bin/python -m intake
+Restart=always
+RestartSec=5
+# на сервере с 1 ГБ памяти бот не должен съесть все
+MemoryMax=400M
+
+[Install]
+WantedBy=default.target

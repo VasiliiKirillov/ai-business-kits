@@ -1,0 +1,11 @@
+config: config/examples/nail-studio.yaml
+name: "вопрос про услуги без записи, потом выбор категории даст цены"
+steps:
+  - client: "а до скольки вы работаете?"
+    parse: {type: question}
+    expect_bot: ["Это вопрос"]
+    expect_card: false
+  - client: "ну тогда хочу педикюр"
+    parse: {type: request, item: "Педикюр"}
+    expect_bot: ["Скажи цену", "Педикюр - 3000 руб. за услугу", "Спроси на какой день"]
+    expect_card: false

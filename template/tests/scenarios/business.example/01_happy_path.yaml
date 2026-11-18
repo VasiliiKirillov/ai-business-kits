@@ -1,0 +1,28 @@
+config: config/business.example.yaml
+name: "полная бронь с подтверждением, договор docx, фото документа уходит до карточки"
+steps:
+  - client: "привет, нужен pcx с 2030-12-01 на 3 дня"
+    parse: {type: request, item: "Honda PCX 160", date_from: "2030-12-01", days: 3}
+    expect_bot: ["Скажи цену", "1350", "Спроси куда привезти"]
+    expect_card: false
+  - client: "в центр"
+    parse: {delivery: "центр"}
+    expect_bot: ["Спроси телефон"]
+  - client: "+66 00 000 0000"
+    parse: {phone: "+66 00 000 0000"}
+    expect_bot: ["Спроси фото документа", "паспорт"]
+  - photo: {doc_full_name: "IVAN TESTOV", doc_number: "000000000", doc_nationality: "Russia", doc_birth_date: "1990-02-01"}
+    expect_bot: ["Все собрано", "итого 1350 бат", "IVAN TESTOV"]
+    expect_card: false
+  - client: "да"
+    parse: {confirmed: true}
+    expect_card: true
+    expect_buttons: [confirm, own]
+    expect_forward_before_card: true
+    expect_bot: ["передал менеджеру"]
+  - manager: confirm
+    expect_manager: ["BK-0001"]
+    expect_booking: {item: "Honda PCX 160", start: "2030-12-01T00:00", end: "2030-12-04T00:00", total: "1350.0", status: "подтверждена"}
+    expect_document: true
+    expect_doc_contains: ["BK-0001", "IVAN TESTOV", "000000000", "Honda PCX 160", "Island Bikes", "01.12.2030"]
+    expect_bot: ["Менеджер подтвердил бронь"]

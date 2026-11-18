@@ -1,0 +1,18 @@
+config: config/business.example.yaml
+name: "отказ дать телефон: объясняем один раз, на второй отказ пропускаем (значение -)"
+steps:
+  - client: "нужен adv с 2030-12-10 на 2 дня, в Ламай"
+    parse: {type: request, item: "Honda ADV 160", date_from: "2030-12-10", days: 2, delivery: "Ламай"}
+    expect_bot: ["Скажи цену", "1600", "Спроси телефон"]
+  - client: "не дам телефон"
+    parse: {declined_field: phone}
+    expect_bot: ["Один раз мягко объясни", "не повторяй"]
+    expect_not_bot: ["Спроси"]
+  - client: "я же сказал, без телефона"
+    parse: {declined_field: phone}
+    expect_fields: {phone: "-"}
+    expect_bot: ["Спроси фото документа"]
+    expect_not_bot: ["Один раз мягко объясни"]
+  - photo: {doc_full_name: "IVAN TESTOV", doc_number: "000000000", doc_nationality: "Russia", doc_birth_date: "1990-02-01"}
+    expect_bot: ["Все собрано", "итого 1600"]
+    expect_not_bot: ["тел:"]

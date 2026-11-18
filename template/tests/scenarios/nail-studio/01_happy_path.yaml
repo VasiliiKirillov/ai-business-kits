@@ -1,0 +1,19 @@
+config: config/examples/nail-studio.yaml
+name: "запись на услугу: дата, время, подтверждение, запись в локальную таблицу"
+steps:
+  - client: "хочу на маникюр с покрытием в пятницу в 14:00"
+    parse: {type: request, item: "Маникюр с покрытием", date: "2030-12-06", time: "14:00"}
+    expect_bot: ["Скажи цену", "Маникюр с покрытием - 2500 руб. за услугу", "Спроси телефон"]
+  - client: "+7 000 000 00 00"
+    parse: {phone: "+7 000 000 00 00"}
+    expect_bot: ["Все собрано", "итого 2500", "06.12.2030", "14:00"]
+  - client: "да, верно"
+    parse: {confirmed: true}
+    expect_card: true
+    expect_buttons: [confirm, own]
+    expect_bot: ["передала администратору"]
+  - manager: confirm
+    expect_manager: ["BK-0001"]
+    expect_booking: {item: "Маникюр с покрытием", start: "2030-12-06T14:00", end: "2030-12-06T15:30"}
+    expect_document: false
+    expect_bot: ["Администратор подтвердил запись"]

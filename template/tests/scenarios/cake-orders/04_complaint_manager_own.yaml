@@ -1,0 +1,9 @@
+config: config/examples/cake-orders.yaml
+name: "жалоба и ответ менеджера своими словами уходит клиенту дословно"
+steps:
+  - client: "торт привезли не в тот день, это безобразие"
+    parse: {type: complaint}
+    expect_card: true
+    expect_buttons: [own]
+  - manager: {own: "Приносим извинения, свяжемся в течение часа"}
+    expect_bot: ["Приносим извинения, свяжемся в течение часа"]

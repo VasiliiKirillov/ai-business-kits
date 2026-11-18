@@ -1,0 +1,92 @@
+# Пример: студия маникюра (вымышленная "Studio Nails"). Запись на услугу: услуга + дата + время.
+# Окошки считаются по общей вместимости: двое мастеров работают одновременно.
+
+business:
+  name: "Studio Nails"
+  description: "Студия маникюра и педикюра"
+  timezone: "Europe/Moscow"
+  currency: "руб."
+  language: ru
+
+bot:
+  persona: "Анна, администратор студии"
+  tone: |
+    Дружелюбно и коротко, 1-2 предложения, как в мессенджере. Без канцелярита.
+  address: vy
+  greeting: "Здравствуйте, это Studio Nails. Напишите, на какую услугу хотите записаться, на какой день и время."
+  tone_examples:
+    - "записала бы вас на пятницу. на какое время удобно?"
+    - "маникюр с покрытием, 2500 руб."
+  banned_phrases: ["спасибо за обращение", "рады помочь"]
+  style:
+    no_emoji: true
+    no_exclamation: true
+    replace_yo: true
+    plain_dashes: true
+  facts:
+    - "Работаем ежедневно с 10:00 до 20:00."
+    - "Если нужно перенести запись, предупредите за 3 часа."
+  voice_reply: "голосовые пока не слушаю, напишите текстом"
+
+request:
+  noun: "запись"
+  item_noun: "услуга"
+  fields:
+    - key: item
+      type: item
+      label: "услуга"
+      ask: "на какую услугу записать"
+    - key: date
+      type: date
+      label: "дата"
+      describe: "день визита"
+      ask: "на какой день"
+    - key: time
+      type: time
+      label: "время"
+      describe: "время начала визита"
+      ask: "на какое время"
+    - key: phone
+      type: phone
+      label: "телефон"
+      ask: "телефон для связи"
+      declinable: true
+      decline_reason: "номер нужен, чтобы напомнить о записи или предупредить, если что-то изменится"
+  identity_document:
+    enabled: false
+  parse_hints: []
+
+catalog:
+  price_unit: "за услугу"
+  categories:
+    - {name: "Маникюр", aliases: ["маникюр", "manicure"]}
+    - {name: "Педикюр", aliases: ["педикюр", "pedicure"]}
+  items:
+    - {name: "Маникюр классический", aliases: ["классический маникюр", "обычный маникюр"], category: "Маникюр", price: 1500, duration_min: 60}
+    - {name: "Маникюр с покрытием", aliases: ["гель-лак", "с покрытием", "гель лак"], category: "Маникюр", price: 2500, duration_min: 90}
+    - {name: "Педикюр", aliases: ["педикюр"], category: "Педикюр", price: 3000, duration_min: 90}
+    - {name: "Маникюр и педикюр", aliases: ["комплекс"], category: "Педикюр", price: 5000, duration_min: 150, details: "Комплекс: маникюр с покрытием и педикюр за один визит."}
+
+pricing:
+  mode: per_unit
+  rounding: 10
+
+availability:
+  mode: slots
+  date_field: date
+  time_field: time
+  capacity: 2                       # общий пул: два мастера
+  hours: {open: "10:00", close: "20:00", step_min: 30}
+  alternatives: 2
+
+manager:
+  confirm_button: "Подтвердить"
+  own_button: "Отвечу сама"
+  after_confirm_client: "Администратор подтвердил запись. Напиши клиенту подтверждение, дату, время и что нужно прийти за 5 минут"
+  handoff_text: "передала администратору, она подтвердит запись, обычно в течение 15 минут"
+
+data:
+  source: local
+
+documents:
+  engine: none

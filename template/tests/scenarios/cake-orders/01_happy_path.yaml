@@ -1,0 +1,19 @@
+config: config/examples/cake-orders.yaml
+name: "заказ торта с доставкой: подтверждение и запись без документа"
+steps:
+  - client: "хочу медовик на 10 декабря, доставка на Лесную 5"
+    parse: {type: request, item: "Медовик", date: "2030-12-10", delivery: "Лесная 5"}
+    expect_bot: ["Скажи цену", "Медовик - 1800 руб. за штуку", "Спроси телефон"]
+  - client: "+7 000 000 00 00"
+    parse: {phone: "+7 000 000 00 00"}
+    expect_bot: ["Все собрано", "итого 1800", "10.12.2030"]
+  - client: "да"
+    parse: {confirmed: true}
+    expect_card: true
+    expect_buttons: [confirm, own]
+    expect_bot: ["передала кондитеру"]
+  - manager: confirm
+    expect_manager: ["BK-0001"]
+    expect_booking: {item: "Медовик", total: "1800.0"}
+    expect_document: false
+    expect_bot: ["Кондитер подтвердила заказ"]

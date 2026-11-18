@@ -1,0 +1,12 @@
+config: config/business.example.yaml
+name: "жалоба: одна карточка только с кнопкой Отвечу сам, дальше реплики пересылаются"
+steps:
+  - client: "байк сломался, а вы не отвечаете"
+    parse: {type: complaint}
+    expect_card: true
+    expect_buttons: [own]
+    expect_bot: ["передал менеджеру"]
+  - client: "алло, кто-нибудь есть?"
+    parse: {}
+    expect_card: false
+    expect_manager: ["💬", "алло"]

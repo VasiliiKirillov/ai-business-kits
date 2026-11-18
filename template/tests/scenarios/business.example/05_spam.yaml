@@ -1,0 +1,7 @@
+config: config/business.example.yaml
+name: "спам: бот молчит, карточки нет"
+steps:
+  - client: "Заработок в интернете, пиши в личку"
+    parse: {type: spam}
+    expect_silent: true
+    expect_card: false

@@ -1,0 +1,133 @@
+# Пример: прокат байков на острове (вымышленный "Island Bikes"). Скопируй в business.yaml и поправь под себя.
+# Все особенности бизнеса живут здесь, код и промпты общие.
+
+business:
+  name: "Island Bikes"
+  description: "Прокат скутеров и мотоциклов на острове"
+  timezone: "Asia/Bangkok"          # "сегодня" считается в этом поясе
+  currency: "бат"
+  language: ru
+
+bot:
+  persona: "Марк, менеджер проката"
+  tone: |
+    Спокойный, ровный человек, пишет как в мессенджере. Коротко, 1-2 предложения, разговорно.
+    Можно "ага", "ну", "давай", "понял". На мат клиента реагируй спокойно, как на обычную речь.
+  address: auto                     # auto | ty | vy
+  greeting: "Привет, это Island Bikes. Напишите, какой байк нужен, с какого числа и куда привезти."
+  tone_examples:
+    - "ага, с 20го на неделю. какой байк нужен?"
+    - "залог 3000 бат или паспорт, как удобнее."
+    - "передал менеджеру, проверит наличие, обычно минут 15."
+  banned_phrases: ["отлично", "супер", "спасибо за обращение", "рад помочь"]
+  style:                            # пост-обработка ответов кодом
+    no_emoji: true
+    no_exclamation: true
+    replace_yo: true
+    plain_dashes: true
+    lowercase_start: false
+  facts:                            # единственные факты помимо каталога, остальное бот не выдумывает
+    - "Доставка по острову бесплатно от 3 дней."
+    - "Нужны права категории A (или международные с A). Шлем в комплекте."
+    - "Залог 3000 бат или паспорт."
+  voice_reply: "голосовые пока не понимаю, напишите текстом"
+
+request:
+  noun: "бронь"                     # бронь | запись | заказ
+  item_noun: "байк"                 # байк | услуга | торт
+  fields:                           # порядок = порядок вопросов
+    - key: date_from
+      type: date
+      label: "дата начала"
+      describe: "дата начала аренды"
+      ask: "с какого числа нужен байк"
+    - key: days
+      type: int
+      label: "срок"
+      describe: "длительность аренды в днях (неделя = 7, месяц = 30); если даты 'с ... по ...', посчитай"
+      ask: "на сколько дней"
+    - key: item
+      type: item
+      label: "байк"
+      ask: "какой байк нужен (модель или класс)"
+    - key: quantity
+      type: int
+      label: "количество"
+      default: 1
+      ask_only_if_unclear: true     # спрашиваем, только если клиент сказал неясно ("нас двое")
+      describe: "число байков, только если ясно; если неясно, один байк или два - не заполняй"
+      ask: "один байк на двоих или два"
+    - key: delivery
+      type: text
+      label: "доставка"
+      describe: "район доставки или слово 'самовывоз'"
+      ask: "куда привезти (район) или заберете сами"
+    - key: phone
+      type: phone
+      label: "телефон"
+      ask: "телефон или WhatsApp для связи"
+      declinable: true              # отказ: объясняем один раз, на второй отказ пропускаем (значение "-")
+      decline_reason: "номер нужен, чтобы связаться по брони, если что-то поменяется (WhatsApp тоже подойдет)"
+  identity_document:
+    enabled: true
+    name: "паспорт"
+    reason: "это нужно для договора"
+    fields: [full_name, number, nationality, birth_date]
+    accept_photo: true              # фото читает нейросеть с поддержкой картинок
+  parse_hints: []                   # дополнительные правила для разбора, если нужны
+
+catalog:
+  price_unit: "в день"
+  categories:
+    - {name: "Скутер", aliases: ["скутер", "scooter"]}
+    - {name: "Макси", aliases: ["макси", "maxi"]}
+    - {name: "Премиум", aliases: ["премиум", "большой байк", "big bike"]}
+  items:
+    - {name: "Honda Scoopy", aliases: ["scoopy", "скупи"], category: "Скутер", price: 250, stock: 3}
+    - {name: "Honda Click 125", aliases: ["click", "клик"], category: "Скутер", price: 300, stock: 2}
+    - {name: "Honda PCX 160", aliases: ["pcx", "пцх"], category: "Макси", price: 450, stock: 4}
+    - {name: "Yamaha NMAX", aliases: ["nmax", "нмакс"], category: "Макси", price: 500, stock: 2}
+    - name: "Honda ADV 160"
+      aliases: ["adv", "адв"]
+      category: "Премиум"
+      price: 800
+      stock: 2
+      details: "Высокий скутер для разных дорог, подходит и для горных."
+    - {name: "Honda Forza 350", aliases: ["forza", "форза"], category: "Премиум", price: 1500, stock: 1}
+
+pricing:
+  mode: per_day                     # per_day: цена x дни x количество | per_unit: цена x количество | fixed: цена
+  duration_field: days
+  quantity_field: quantity
+  discounts:
+    - {min_duration: 7, percent: 10}
+  rounding: 1                       # итог округляется до этого шага
+  duration_words: ["день", "дня", "дней"]
+
+availability:
+  mode: days                        # none | days | slots
+  date_field: date_from
+  duration_field: days              # занимает [дата, дата + дни)
+  capacity: per_item                # per_item (stock позиции) или число - общий пул
+  alternatives: 2                   # сколько свободных альтернатив предложить
+
+manager:
+  confirm_button: "Подтвердить"
+  own_button: "Отвечу сам"
+  after_confirm_client: "Менеджер подтвердил бронь. Напиши клиенту подтверждение и что будет дальше: привезем в назначенный день, права и паспорт показать при получении"
+  handoff_text: "передал менеджеру, он проверит наличие, обычно минут 15"
+
+data:
+  source: local                     # local | google_sheets | "пакет.модуль:Класс"
+  google_sheets:                    # если source = google_sheets (id таблицы - в .env, SHEET_ID)
+    catalog_tab: "Catalog"
+    bookings_tab: "Bookings"
+
+documents:
+  engine: docx                      # none | docx | google_docs
+  docx_template: "templates/contract.docx"
+  output_dir: "output"
+  title: "Договор {booking_id} - {client_name}"
+  constants:                        # дополнительные плейсхолдеры {{КЛЮЧ}} в шаблоне
+    COMPANY: "Island Bikes"
+    DEPOSIT: "3000 бат"

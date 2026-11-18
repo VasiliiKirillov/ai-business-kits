@@ -1,0 +1,16 @@
+config: config/business.example.yaml
+name: "фото позиции: один раз после выбора, потом только по просьбе"
+photos: [hondapcx160]
+steps:
+  - client: "нужен pcx"
+    parse: {type: request, item: "Honda PCX 160"}
+    expect_photo: "hondapcx160.jpg"
+    expect_bot: ["Honda PCX 160: 450 бат в день", "Спроси с какого числа"]
+  - client: "с 2030-12-01 на 3 дня"
+    parse: {date_from: "2030-12-01", days: 3}
+    expect_no_photo: true
+    expect_bot: ["Спроси куда привезти"]
+  - client: "скинь фотку pcx"
+    parse: {wants_photo: true, photo_of: "Honda PCX 160"}
+    expect_photo: "hondapcx160.jpg"
+    expect_bot: ["1350"]
