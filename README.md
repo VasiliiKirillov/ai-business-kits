@@ -17,7 +17,7 @@
 ### Claude Code
 
 ```bash
-git clone <url-этого-репозитория>
+git clone https://github.com/VasiliiKirillov/ai-business-kits
 cd ai-business-kits
 claude
 ```
