@@ -24,16 +24,16 @@ description: "Выяснить, где бизнес хранит каталог 
 | Ответ | Решение |
 |---|---|
 | нигде, в голове, с нуля | `data.source: local` (sqlite, каталог в yaml) или новая Google-таблица через `tools/setup_google_sheet.py` |
-| Google Sheets, Docs | `data.source: google_sheets`, OAuth (см. `references/google-oauth.md`) |
+| Google Sheets, Docs | `data.source: google_sheets`, OAuth (см. [shared/google-workspace](../../../shared/google-workspace/SKILL.md)) |
 | Excel-файл | выгрузить в Google Sheets или написать адаптер, см. `references/other-sources.md` |
 | 1C, amoCRM, Bitrix24, Notion, Airtable, своя БД | адаптер, см. `references/other-sources.md` |
 
 2. Если "с нуля" и нужна только пробная версия, оставь `data.source: local`. Каталог берется из `catalog.items` в yaml, брони пишутся в sqlite. Дальше можно пересесть на Google. Расскажи об этом человеку.
-3. Если Google Sheets: пройди `references/google-oauth.md` целиком, затем (если таблицы еще нет) создай ее:
+3. Если Google Sheets: пройди общий скилл [shared/google-workspace](../../../shared/google-workspace/SKILL.md) целиком (Cloud Console, экран согласия, Desktop-клиент, авторизация через `ssh -L`, публикация в Production), затем (если таблицы еще нет) создай ее:
    ```bash
    cd ~/intake-bot
    uv pip install --python .venv/bin/python -r requirements-google.txt
-   .venv/bin/python tools/google_auth.py            # если токена еще нет, см. references/google-oauth.md
+   .venv/bin/python tools/google_auth.py            # если токена еще нет, см. shared/google-workspace
    .venv/bin/python tools/setup_google_sheet.py
    ```
    Google-зависимости (`requirements-google.txt`) нужно поставить до `google_auth.py` и `setup_google_sheet.py`.
@@ -61,17 +61,14 @@ description: "Выяснить, где бизнес хранит каталог 
 - `.venv/bin/python tools/check_config.py config/business.yaml` проходит и показывает цены из выбранного источника.
 - Для Google: каталог читается (в консольном режиме бот называет цену из таблицы, а не из yaml). Измени цену в таблице, подожди минуту (кэш 60 секунд), цена в боте поменялась.
 - Тестовая бронь через консоль (`.venv/bin/python -m intake --console`, команда `/confirm`) появляется в источнике со статусом "подтверждена". Потом удали ее: `.venv/bin/python tools/cleanup_test_data.py --apply` (тестовыми считаются брони, где имя клиента содержит TEST; консоль так и называет клиента).
-- Файл `google_token.json` существует, права `600`, приложение в Production (см. ниже).
+- Файл `google_token.json` существует, права `600`, приложение в Production (см. shared/google-workspace).
 
 ## Подводные камни
 
-- **Google OAuth в режиме Testing: refresh-токен живет 7 дней.** Через неделю бот молча перестает писать в таблицу (ошибка `invalid_grant`). Нужно опубликовать приложение в Production (Branding заполнен, затем Audience, затем Publish app) и заново запустить `tools/google_auth.py`. Это самая частая причина "через неделю все сломалось".
-- Предупреждение "Google не проверил это приложение" ожидаемо для личного использования: "Дополнительно" затем "Перейти на страницу".
+- Google OAuth, режим Testing (токен живет 7 дней), экран согласия и scopes: см. [shared/google-workspace](../../../shared/google-workspace/SKILL.md).
 - Таблицу создавай с локалью en_US. В других локалях формулы через API ломаются.
 - Нельзя угадывать колонки чужой таблицы: сначала прочитай заголовки и покажи человеку.
 - Цены только из источника, бот не должен их округлять или придумывать. Если колонка пуста, это ошибка данных, о которой нужно сообщить владельцу.
-- Не давай боту права шире нужного: scopes только `spreadsheets`, `documents`, `drive.file`.
-- Не печатай client secret и токены в чат, не клади их в репозиторий.
 - Чужие системы: следи за лимитами запросов, кэшируй каталог.
 - Запись в чужую CRM: только с одобрения владельца и сначала в тестовой записи.
 

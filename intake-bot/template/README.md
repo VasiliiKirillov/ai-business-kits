@@ -91,4 +91,4 @@ uv pip install --python .venv/bin/python -r requirements-google.txt
 ## Деплой
 
 `deploy/intake-bot.service` - пользовательский systemd-юнит (`WorkingDirectory=%h/intake-bot`). Установка и
-`loginctl enable-linger` описаны в навыке `intake-server-setup`.
+`loginctl enable-linger` описаны в скилле [shared/server-setup](../../shared/server-setup/SKILL.md).

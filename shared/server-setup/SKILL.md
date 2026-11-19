@@ -1,17 +1,25 @@
 ---
-name: intake-server-setup
-description: "Поднять VPS под бота: SSH-ключи, отдельный пользователь, Python и uv, systemd --user с автозапуском, логи, прокси при геоблокировке; используй, когда бот должен работать круглосуточно."
+name: server-setup
+description: "Поднять VPS под любую автоматизацию из репозитория: SSH-ключи, отдельный пользователь, Python и uv, systemd --user с автозапуском, логи; используй, когда кит должен работать круглосуточно."
 ---
 
 # Сервер: VPS, SSH, systemd
 
+Общий скилл для любого кита. Подставь свои значения вместо плейсхолдеров:
+
+- `<app-dir>` - рабочая папка кита на сервере (для `intake-bot` это `~/intake-bot`);
+- `<service>` - имя systemd-юнита (для `intake-bot` это `intake-bot`);
+- `<user>` и `<server-ip>` - обычный пользователь и адрес сервера.
+
+Конкретные имена, команды запуска и зависимости смотри в папке своего кита (`AGENTS.md` кита).
+
 ## Когда использовать
 
-Когда бот уже запускается локально (`intake-bot-build`) и его нужно перенести туда, где он работает 24/7. Либо когда владелец просит "сначала на своем компьютере": тогда используй раздел "Локальный запуск" и вернись сюда позже.
+Когда кит уже запускается локально и его нужно перенести туда, где он работает 24/7. Либо когда владелец просит "сначала на своем компьютере": тогда используй раздел "Локальный запуск" и вернись сюда позже.
 
 ## Что нужно от человека
 
-- Решение, где держать бота: VPS или свой компьютер (для теста).
+- Решение, где держать кит: VPS или свой компьютер (для теста).
 - Если VPS: аккаунт у хостинг-провайдера и готовность заплатить (порядка 5 долларов в месяц). Покупку делает человек сам, ты только говоришь, что выбрать.
 - Доступ к серверу: IP-адрес и пароль root (или уже добавленный ключ) от провайдера. Пароль человек вводит сам при первом входе, в чат его лучше не писать.
 
@@ -26,7 +34,7 @@ description: "Поднять VPS под бота: SSH-ключи, отдельн
 - 1 vCPU, 1 ГБ памяти, 10 ГБ диска: этого хватает.
 - Ubuntu 24.04 LTS.
 - Регион: такой, где провайдеры LLM не блокируют обращения (у многих API блокировка по стране). Если сомневаешься, выбери регион в Европе или США, либо заранее планируй прокси.
-- Не селись на сервер, где уже работают важные вещи при малой памяти: бот не тяжелый, но вы можете уронить соседей.
+- Не селись на сервер, где уже работают важные вещи при малой памяти: кит не тяжелый, но вы можете уронить соседей.
 - Оплата и покупка на стороне человека. После покупки провайдер выдаст IP и пароль root.
 
 ### 2. SSH-ключ на компьютере владельца
@@ -34,7 +42,7 @@ description: "Поднять VPS под бота: SSH-ключи, отдельн
 Объясни: "Ключ это как цифровой ключ от двери сервера, надежнее пароля."
 
 ```bash
-ls ~/.ssh/id_ed25519.pub 2>/dev/null || ssh-keygen -t ed25519 -C "intake-bot" -f ~/.ssh/id_ed25519 -N ""
+ls ~/.ssh/id_ed25519.pub 2>/dev/null || ssh-keygen -t ed25519 -C "kits" -f ~/.ssh/id_ed25519 -N ""
 ssh-copy-id root@<server-ip>
 ```
 
@@ -48,8 +56,8 @@ ssh-copy-id root@<server-ip>
 ssh root@<server-ip>
 adduser --disabled-password --gecos "" <user>
 usermod -aG sudo <user>
-mkdir -p /home/<user>/.ssh && cp ~/.ssh/authorized_keys /home/<user>/.ssh/
-chown -R <user>:<user> /home/<user>/.ssh && chmod 700 /home/<user>/.ssh && chmod 600 /home/<user>/.ssh/authorized_keys
+mkdir -p ~<user>/.ssh && cp ~/.ssh/authorized_keys ~<user>/.ssh/
+chown -R <user>:<user> ~<user>/.ssh && chmod 700 ~<user>/.ssh && chmod 600 ~<user>/.ssh/authorized_keys
 echo "<user> ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-<user>
 apt update && DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
 exit
@@ -81,21 +89,21 @@ export PATH=$HOME/.local/bin:$PATH
 uv python install 3.12
 ```
 
-### 6. Копирование бота на сервер
+### 6. Копирование кита на сервер
 
-С компьютера владельца (из папки с ботом):
+С компьютера владельца (из папки кита на компьютере):
 
 ```bash
-rsync -av --exclude .venv --exclude .env --exclude '*.db' --exclude output --exclude google_token.json ~/intake-bot/ <user>@<server-ip>:~/intake-bot/
+rsync -av --exclude .venv --exclude .env --exclude '*.db' --exclude output --exclude google_token.json <app-dir>/ <user>@<server-ip>:<app-dir>/
 ```
 
-Или `git clone`, если бот лежит в приватном репозитории. `.env` и токены не копируй через git.
+Или `git clone`, если кит лежит в приватном репозитории. `.env` и токены не копируй через git.
 
 ### 7. Виртуальное окружение и зависимости
 
 ```bash
 ssh <user>@<server-ip>
-cd ~/intake-bot
+cd <app-dir>
 uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -r requirements.txt
 # если данные в Google:
@@ -104,7 +112,7 @@ uv pip install --python .venv/bin/python -r requirements-google.txt
 
 ### 8. Файл .env
 
-Объясни: "В этом файле лежат пароли бота. Он виден только вам."
+Объясни: "В этом файле лежат пароли и ключи. Он виден только вам."
 
 Лучше, чтобы человек сам вписал значения:
 
@@ -113,41 +121,26 @@ cp .env.example .env && chmod 600 .env
 nano .env
 ```
 
-Заполняется как в `intake-bot-build` (BOT_TOKEN, MANAGER_CHAT_ID, LLM_PROVIDER, LLM_API_KEY, модели). Если пишешь сам, не печатай значения в чат.
+Список переменных смотри в `.env.example` кита (для `intake-bot` см. `intake-bot/skills/intake-bot-build/SKILL.md`). Ключи моделей и выбор провайдера: `../llm-providers/SKILL.md`. Если пишешь сам, не печатай значения в чат.
 
 ### 9. Проверка региона и прокси
 
-Перед запуском проверь, достает ли сервер до выбранного провайдера LLM:
-
-```bash
-curl -sI https://api.anthropic.com | head -1
-curl -sI https://api.deepseek.com | head -1
-curl -sI https://api.openai.com | head -1
-curl -sI https://api.telegram.org | head -1
-```
-
-Ответ HTTP любого кода (200, 401, 404) значит, что дорога открыта. Если видишь 403 с текстом о стране, таймаут или обрыв, это геоблок или сеть. Решение: другой регион сервера, либо прокси. Прокси задается в `.env`:
-
-```
-LLM_PROXY=http://<proxy-host>:<port>
-```
-
-Поддерживаются http(s) и socks. Прокси человек покупает или поднимает сам, это платное, спроси согласие.
+Если кит ходит к LLM-провайдеру, проверь с сервера доступ к его API и при необходимости настрой прокси: см. `../llm-providers/SKILL.md` (разделы про геоблок и прокси). Проверь заодно, что сервер достает до сервисов, которые нужны киту (например `curl -sI https://api.telegram.org | head -1`). Любой HTTP-ответ (200, 401, 404) значит, что дорога открыта.
 
 ### 10. Сервис systemd --user с автозапуском
 
-Объясни: "Сделаем так, чтобы бот сам запускался при перезагрузке сервера и поднимался после сбоя."
+Объясни: "Сделаем так, чтобы сервис сам запускался при перезагрузке сервера и поднимался после сбоя."
 
 ```bash
 mkdir -p ~/.config/systemd/user
-cp ~/intake-bot/deploy/intake-bot.service ~/.config/systemd/user/intake-bot.service
+cp <app-dir>/deploy/<service>.service ~/.config/systemd/user/<service>.service
 sudo loginctl enable-linger <user>
 export XDG_RUNTIME_DIR=/run/user/$(id -u)
 systemctl --user daemon-reload
-systemctl --user enable --now intake-bot
+systemctl --user enable --now <service>
 ```
 
-Юнит лежит в `template/deploy/intake-bot.service` (папка бота `~/intake-bot`, venv в `~/intake-bot/.venv`). Если папка другая, поправь пути в юните. В юните нет `EnvironmentFile`: бот сам читает `.env` из `WorkingDirectory` (systemd-овский `EnvironmentFile` ломается на комментариях в конце строки). Значит `.env` должен лежать в `~/intake-bot/`.
+Юнит лежит в папке кита (для `intake-bot`: `intake-bot/template/deploy/intake-bot.service`; папка на сервере `<app-dir>`, venv в `<app-dir>/.venv`). Если папка другая, поправь пути в юните. В юните нет `EnvironmentFile`: приложение само читает `.env` из `WorkingDirectory` (systemd-овский `EnvironmentFile` ломается на комментариях в конце строки). Значит `.env` должен лежать в `<app-dir>/`.
 
 `enable-linger` нужен, чтобы user-сервисы жили без открытой SSH-сессии. `XDG_RUNTIME_DIR` нужен при каждом входе по SSH, когда управляешь сервисом. Добавь строку в `~/.bashrc`:
 
@@ -158,17 +151,17 @@ echo 'export XDG_RUNTIME_DIR=/run/user/$(id -u)' >> ~/.bashrc
 ### 11. Логи, перезапуск, обновление
 
 ```bash
-journalctl --user -u intake-bot -n 100 --no-pager      # последние строки
-journalctl --user -u intake-bot -f                     # живой поток
-systemctl --user status intake-bot
-systemctl --user restart intake-bot
+journalctl --user -u <service> -n 100 --no-pager      # последние строки
+journalctl --user -u <service> -f                     # живой поток
+systemctl --user status <service>
+systemctl --user restart <service>
 ```
 
 Обновление кода (с компьютера владельца):
 
 ```bash
-rsync -av --exclude .venv --exclude .env --exclude '*.db' --exclude output --exclude google_token.json ~/intake-bot/ <user>@<server-ip>:~/intake-bot/
-ssh <user>@<server-ip> "export XDG_RUNTIME_DIR=/run/user/\$(id -u); systemctl --user restart intake-bot"
+rsync -av --exclude .venv --exclude .env --exclude '*.db' --exclude output --exclude google_token.json <app-dir>/ <user>@<server-ip>:<app-dir>/
+ssh <user>@<server-ip> "export XDG_RUNTIME_DIR=/run/user/\$(id -u); systemctl --user restart <service>"
 ```
 
 Сначала проверь изменение локально, потом выкатывай. Не затирай базу `*.db` и `.env` на сервере.
@@ -178,36 +171,34 @@ ssh <user>@<server-ip> "export XDG_RUNTIME_DIR=/run/user/\$(id -u); systemctl --
 Для теста сервер не нужен (нет uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`; Python 3.11-3.13 подойдет):
 
 ```bash
-cd ~/intake-bot
+cd <app-dir>
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
-.venv/bin/python -m intake --console      # терминальный режим
-.venv/bin/python -m intake                # настоящий Telegram, пока открыт терминал
 ```
 
-Минус: бот работает, пока компьютер включен и терминал открыт. Для постоянной работы нужен сервер.
+Команды запуска смотри в `AGENTS.md` и README своего кита (для `intake-bot`: `.venv/bin/python -m intake --console` и `.venv/bin/python -m intake`).
+
+Минус: все работает, пока компьютер включен и терминал открыт. Для постоянной работы нужен сервер.
 
 ## Проверка
 
 - `ssh <user>@<server-ip> whoami` возвращает имя пользователя без пароля.
-- `ls -l ~/intake-bot/.env` показывает права `-rw-------`.
-- `systemctl --user is-active intake-bot` отвечает `active`.
-- `journalctl --user -u intake-bot -n 30` без трейсбэков, есть строка о запуске.
-- Перезагрузи сервер (спроси согласие): `sudo reboot`, через минуту `systemctl --user is-active intake-bot` снова `active`.
-- Написать боту в Telegram `/start` и получить приветствие.
+- `ls -l <app-dir>/.env` показывает права `-rw-------`.
+- `systemctl --user is-active <service>` отвечает `active`.
+- `journalctl --user -u <service> -n 30` без трейсбэков, есть строка о запуске.
+- Перезагрузи сервер (спроси согласие): `sudo reboot`, через минуту `systemctl --user is-active <service>` снова `active`.
+- Кит отвечает так, как описано в его README (для `intake-bot`: `/start` в Telegram возвращает приветствие).
 
 ## Подводные камни
 
-- Слабый VPS: ничего тяжелого. Не ставь локальные модели, браузеры, базы данных. Бот должен занимать порядка сотни мегабайт.
+- Слабый VPS: ничего тяжелого. Не ставь локальные модели, браузеры, базы данных. Типичный кит занимает порядка сотни мегабайт.
 - Не отключай вход по паролю, пока ключ не проверен в отдельной сессии.
 - Без `loginctl enable-linger` сервис умирает при выходе из SSH.
 - Без `XDG_RUNTIME_DIR` команда `systemctl --user` отвечает "Failed to connect to bus".
-- Геоблок: у ряда провайдеров LLM нельзя обращаться из некоторых стран. Проверь `curl` до запуска, а не после.
-- Подписочные OAuth-токены провайдеров LLM могут быть запрещены в сторонних приложениях. Используй официальные API-ключи.
+- Геоблок провайдеров LLM и официальные API-ключи: `../llm-providers/SKILL.md`.
 - Не копируй `.env` в git и не пересылай по мессенджерам.
 - Если сервер используется для чего-то еще, спроси владельца, чтобы не сломать чужое.
 
 ## Дальше
 
-- Данные в Google или чужой системе: `intake-data-integration`.
-- Документы: `intake-documents`.
-- Тесты в Telegram и запуск: `intake-testing-launch`.
+- Данные в Google: `../google-workspace/SKILL.md`.
+- Дальнейшие шаги (документы, тесты, запуск) идут по `AGENTS.md` выбранного кита.

@@ -23,12 +23,12 @@ description: "Собрать и запустить бота из template/: ра
 ### 1. Рабочая папка
 
 ```bash
-mkdir -p ~/intake-bot && cp -r <путь-к-репозиторию>/template/. ~/intake-bot/ && cd ~/intake-bot
+mkdir -p ~/intake-bot && cp -r <путь-к-репозиторию>/intake-bot/template/. ~/intake-bot/ && cd ~/intake-bot
 rm -rf .venv   # если в template/ случайно был .venv, не берем его
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
 ```
 
-`<путь-к-репозиторию>` - папка, куда склонирован этот репозиторий (скиллы могут лежать в `~/.claude/skills`, а `template/` остается в клоне). Нет uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`. Python 3.11-3.13 подойдет, системный `python3` не используй. Все Python-команды запускай как `.venv/bin/python ...` (каждая команда агента идет в новой оболочке, `activate` не сохраняется).
+`<путь-к-репозиторию>` - папка, куда склонирован этот репозиторий (скиллы могут лежать в `~/.claude/skills`, а `intake-bot/template/` остается в клоне). Нет uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`. Python 3.11-3.13 подойдет, системный `python3` не используй. Все Python-команды запускай как `.venv/bin/python ...` (каждая команда агента идет в новой оболочке, `activate` не сохраняется).
 
 Если данные в Google, еще `uv pip install --python .venv/bin/python -r requirements-google.txt`. Если папка уже есть после онбординга, не копируй заново и не перезаписывай `config/business.yaml`.
 
@@ -64,9 +64,9 @@ LLM_MODEL_PARSE=<model-name>
 LLM_MODEL_CHAT=<model-name>
 ```
 
-`LLM_PROVIDER`: anthropic, openai, deepseek, openrouter, ollama или custom. `LLM_MODEL_PARSE` - быстрая дешевая модель для разбора, `LLM_MODEL_CHAT` - модель для ответов. `LLM_PROXY=http://<proxy-host>:<port>` добавляй, только если сервер в геоблоке (см. `intake-server-setup`). Комментарии в `.env` пиши только отдельной строкой, не после значения.
+`LLM_PROVIDER`: anthropic, openai, deepseek, openrouter, ollama или custom. `LLM_MODEL_PARSE` - быстрая дешевая модель для разбора, `LLM_MODEL_CHAT` - модель для ответов. `LLM_PROXY=http://<proxy-host>:<port>` добавляй, только если сервер в геоблоке (см. [shared/llm-providers](../../../shared/llm-providers/SKILL.md)). Комментарии в `.env` пиши только отдельной строкой, не после значения.
 
-Имена моделей проверь у провайдера: они меняются. Если оставить пустыми, возьмутся значения по умолчанию, но все равно сверься с актуальным списком моделей провайдера. Нужен официальный API-ключ, не подписка.
+Выбор провайдера, имена моделей, официальные ключи и геоблок: [shared/llm-providers](../../../shared/llm-providers/SKILL.md). Если оставить модели пустыми, возьмутся значения по умолчанию, но сверься со списком провайдера.
 
 ### 5. Группа менеджера и MANAGER_CHAT_ID
 
@@ -157,7 +157,7 @@ steps:
 .venv/bin/python -m intake
 ```
 
-Напиши боту `/start`. Дальше тесты в `intake-testing-launch`. Для круглосуточной работы `intake-server-setup`.
+Напиши боту `/start`. Дальше тесты в `intake-testing-launch`. Для круглосуточной работы [shared/server-setup](../../../shared/server-setup/SKILL.md).
 
 ## Как это устроено внутри
 
@@ -203,5 +203,5 @@ steps:
 
 - Документ из шаблона: `intake-documents`.
 - Данные в Google или CRM: `intake-data-integration`.
-- Перенос на сервер: `intake-server-setup`.
+- Перенос на сервер: [shared/server-setup](../../../shared/server-setup/SKILL.md).
 - Тесты и запуск: `intake-testing-launch`.

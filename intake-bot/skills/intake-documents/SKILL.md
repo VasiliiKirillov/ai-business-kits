@@ -46,7 +46,7 @@ description: "Настроить создание документа (догов
    ```
    GOOGLE_DOC_TEMPLATE_ID=<template-doc-id>
    ```
-   Бот копирует шаблон через Drive и заменяет плейсхолдеры (`replaceAllText`). Нужны Google OAuth и API Docs, Drive.
+   Бот копирует шаблон через Drive и заменяет плейсхолдеры (`replaceAllText`). Нужны Google OAuth и API Docs, Drive: [shared/google-workspace](../../../shared/google-workspace/SKILL.md).
    Важно: доступ у бота только `drive.file`, то есть к файлам, которые создал он сам. Документ, созданный владельцем вручную в Google Docs, бот скопировать не сможет (ошибка 404 File not found). Поэтому шаблон загружай через `setup_google_sheet.py --upload-template`, а правь его потом прямо в Google Docs, это можно. Широкий доступ ко всему Drive не проси без нужды.
 6. Протестируй рендер (см. Проверка).
 7. Покажи владельцу сгенерированный документ, получи правки текста, обнови шаблон.

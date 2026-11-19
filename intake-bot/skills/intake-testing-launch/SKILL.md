@@ -145,9 +145,9 @@ journalctl --user -u intake-bot -f
 Диагностика, если бот молчит:
 
 1. Сервис жив? `systemctl --user is-active intake-bot`. Нет: смотри логи, перезапусти.
-2. В логах ошибки LLM `401`, `403`, `invalid api key`: проверь `LLM_API_KEY`, баланс у провайдера и что ключ официальный API, а не подписка.
-3. Таймауты или "country not supported": геоблок. Проверь `curl -sI https://api.anthropic.com` (или адрес своего провайдера), настрой `LLM_PROXY` или смени регион сервера.
-4. Ошибка `invalid_grant` от Google: токен протух. Если приложение в Testing, оно живет 7 дней: опубликуй в Production и заново запусти `.venv/bin/python tools/google_auth.py`. Брони тем временем не пишутся в таблицу, менеджер видит сообщения "не смог ...".
+2. В логах ошибки LLM `401`, `403`, `invalid api key`: проверь `LLM_API_KEY`, баланс у провайдера и что ключ официальный API, а не подписка ([shared/llm-providers](../../../shared/llm-providers/SKILL.md)).
+3. Таймауты или "country not supported": геоблок, прокси и смена региона описаны в [shared/llm-providers](../../../shared/llm-providers/SKILL.md).
+4. Ошибка `invalid_grant` от Google: токен протух (в режиме Testing он живет 7 дней), лечение в [shared/google-workspace](../../../shared/google-workspace/SKILL.md): опубликовать в Production и заново запустить `.venv/bin/python tools/google_auth.py`. Брони тем временем не пишутся в таблицу, менеджер видит "не смог ...".
 5. Бот отвечает, но карточки не приходят: неверный `MANAGER_CHAT_ID`, бота убрали из группы или у группы изменился id (после превращения в супергруппу). Снова `/id` в группе.
 6. После правки кода ничего не изменилось: забыл `systemctl --user restart intake-bot`.
 7. Нехватка памяти на VPS: `free -m`, смотри `dmesg | grep -i oom`.
